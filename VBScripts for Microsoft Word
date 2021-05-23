@@ -1,0 +1,42 @@
+' Words.VBS - Create a list of all 4-letter words 
+' This program will add these words to a Microsoft Word document. 
+Option Explicit 
+Const Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" 
+Dim objWord, ctrWord 
+Dim L1, L2, L3, L4 
+ctrWord = 0 
+Set objWord = CreateObject("Word.Application") ' Launch Microsoft Word 
+objWord.Documents.Add ' Create a new document 
+' Making Word visible will allow you to watch as the words are added to the document, but it  ' SIGNIFICANTLY slows down the processing. 
+objWord.Visible = True 
+' All two-letter combinations: 26**2 = 676 
+' All three-letter combinations: 26**3 = 17,576 
+' All four-letter combinations: 26**4 = 456,976 
+Do  
+ For L1 = 1 to 26 
+ For L2 = 1 to 26  
+ For L3 = 1 to 26 
+ For L4 = 1 to 26 
+ctrWord = ctrWord + 1 
+ objword.selection.font.name = "Times New Roman" 
+ objword.selection.font.size = 10 
+ objWord.Selection.TypeText ctrWord & vbTab 
+ objword.selection.font.name = "Courier New" 
+ objword.selection.font.size = 12 
+ objWord.Selection.TypeText mid(Alphabet,L1,1) & _ 
+ mid(Alphabet,L2,1) & _ 
+ mid(Alphabet,L3,1) & _ 
+ mid(Alphabet,L4,1) & _ 
+ vbCrLf 
+  
+ If ctrWord > 17578 then ' DON'T PROCESS THE ENTIRE FILE 
+ exit do 
+ end if 
+ next 
+ next 
+ next 
+ next  
+Loop 
+objWord.Visible = True 
+'Wscript.quit 
+'objWord.Selection.movedown 'objWord.Selection.typeparagraph()
