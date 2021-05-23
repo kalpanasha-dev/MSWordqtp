@@ -1,0 +1,139 @@
+' List Microsoft Word Properties 
+Option Explicit 
+On Error Resume Next ' Since we cannot trap the errors that occur Dim objWord, objAddIn, objCaption, objDictionary, objDocument, objConverter, objFont Dim objLabel, objLanguage, objFile, objWindow, objBinding, objTask, objTemplate, objDialog Dim ctr, svFontname, svFontSize 
+Set objWord = CreateObject("Word.Application") 
+objWord.Documents.Add ' Create a new document 
+objWord.Visible = True 
+objWord.Selection.TypeText "Active Printer: " & objWord.ActivePrinter & vbCRLF 
+For Each objAddIn in objWord.AddIns 
+ objWord.Selection.TypeText "AddIn: " & objAddIn & vbCRLF 
+Next 
+objWord.Selection.TypeText "Application: " & objWord.Application & vbCRLF objWord.Selection.TypeText "Assistant: " & objWord.Assistant & vbCRLF 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "AutoCaptions (" & objWord.AutoCaptions.Count & "):" & vbCRLF ctr = 0 
+For Each objCaption in objWord.AutoCaptions 
+ ctr = ctr + 1 
+ objWord.Selection.TypeText "- " & ctr & ": " & objCaption & vbCRLF 
+Next 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "Automation Security: " & objWord.AutomationSecurity & vbCRLF objWord.Selection.TypeText "Background Printing Status: " & objWord.BackgroundPrintingStatus &  vbCRLF 
+objWord.Selection.TypeText "Background Saving Status: " & objWord.BackgroundSavingStatus & vbCRLF objWord.Selection.TypeText "Browse Extra File Type: " & objWord.BrowseExtraFileTypes & vbCRLF objWord.Selection.TypeText "Build: " & objWord.Build & vbCRLF 
+objWord.Selection.TypeText "Caps Lock: " & objWord.CapsLock & vbCRLF 
+objWord.Selection.TypeText "Caption: " & objWord.Caption & vbCRLF 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "Caption Labels (" & objWord.CaptionLabels.Count & "):" & vbCRLF ctr = 0 
+For Each objLabel in objWord.CaptionLabels 
+ ctr = ctr + 1 
+ objWord.Selection.TypeText "- " & ctr & ": " & objLabel & vbCRLF 
+Next 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "Check Language: " & objWord.CheckLanguage & vbCRLF 
+For Each objAddIn in objWord.COMAddIns 
+ objWord.Selection.TypeText "COM AddIn: " & objAddIn & vbCRLF 
+Next 
+objWord.Selection.TypeText "Creator: " & objWord.Creator & vbCRLF 
+For Each objDictionary in objWord.CustomDictionaries
+ objWord.Selection.TypeText "Custom Dictionary: " & objDictionary & vbCRLF Next 
+objWord.Selection.TypeText "Customization Context: " & objWord.CustomizationContext & vbCRLF objWord.Selection.TypeText "Default Legal Blackline: " & objWord.DefaultLegalBlackline & vbCRLF objWord.Selection.TypeText "Default Save Format: " & objWord.DefaultSaveFormat & vbCRLF objWord.Selection.TypeText "Default Table Separator: " & objWord.DefaultTableSeparator & vbCRLF 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "Dialogs (" & objWord.Dialogs.Count & "), not listed." & vbCRLF ' Displaying these dialogues as above does funny things to the Word document.  ' #68 (199) will wipe out the text in the document and start all over. 
+' Another will do something with Outlook. 
+'objWord.Dialogs(80).Show ' Word help dialogue 
+objWord.Selection.TypeText "Display Alerts: " & objWord.DisplayAlerts & vbCRLF objWord.Selection.TypeText "Display Recent Files: " & objWord.DisplayRecentFiles & vbCRLF objWord.Selection.TypeText "Display Screen Tips: " & objWord.DisplayScreenTips & vbCRLF objWord.Selection.TypeText "Display Scroll Bars: " & objWord.DisplayScrollBars & vbCRLF 
+For Each objDocument in objWord.Documents 
+ objWord.Selection.TypeText "Document: " & objDocument & vbCRLF 
+Next 
+objWord.Selection.TypeText "Email Template: " & objWord.EmailTemplate & vbCRLF objWord.Selection.TypeText "Enable Cancel Key: " & objWord.EnableCancelKey & vbCRLF objWord.Selection.TypeText "Feature Install: " & objWord.FeatureInstall & vbCRLF 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "File Converters (" & objWord.FileConverters.Count & "):" & vbCRLF ctr = 0 
+For Each objConverter in objWord.FileConverters 
+ ctr = ctr + 1 
+ objWord.Selection.TypeText "- " & ctr & ": " & objConverter & vbCRLF 
+Next 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "Focus In MailHeader: " & objWord.FocusInMailHeader & vbCRLF 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "Font names (" & objWord.Fontnames.Count & "):" & vbCRLF ctr = 0 
+For Each objFont in objWord.FontNames 
+ctr = ctr + 1 
+ objWord.Selection.TypeText "- " & ctr & ": " & objFont & vbCRLF 
+Next 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "Height: " & objWord.Height & vbCRLF 
+' This isn't working. The system complains about objBinding. 
+'For Each objBinding in objWord.KeyBindings 
+' objWord.Selection.TypeText "Key Binding: " & objBinding & vbCRLF 
+'Next 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "LandscapeFontnames (" & objWord.LandScapeFontnames.Count & "):" &  vbCRLF 
+ctr = 0 
+For Each objFont in objWord.LandscapeFontNames 
+ ctr = ctr + 1 
+ objWord.Selection.TypeText "- " & ctr & ": " & objFont & vbCRLF 
+Next 
+objWord.Selection.TypeText vbcrlf 
+objWord.Selection.TypeText "Languages (" & objWord.Languages.Count & "):" & vbCRLF ctr = 0 
+For Each objLanguage in objWord.Languages 
+ ctr = ctr + 1 
+ objWord.Selection.TypeText "- " & ctr & ": " & objLanguage & vbCRLF 
+Next 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "Left" & objWord.Left & vbCRLF 
+objWord.Selection.TypeText "Mail System: " & objWord.MailSystem & vbCRLF 
+objWord.Selection.TypeText "MAPI Available: " & objWord.MAPIAvailable & vbCRLF objWord.Selection.TypeText "Math Coprocessor Available: " & objWord.MathCoprocessorAvailable &  vbCRLF 
+objWord.Selection.TypeText "Mouse Available: " & objWord.MouseAvailable & vbCRLF objWord.Selection.TypeText "Name: " & objWord.Name & vbCRLF 
+objWord.Selection.TypeText "Normal Template: " & objWord.NormalTemplate & vbCRLF objWord.Selection.TypeText "Num Lock: " & objWord.NumLock & vbCRLF 
+objWord.Selection.TypeText "Parent: " & objWord.Parent & vbCRLF 
+objWord.Selection.TypeText "Path: " & objWord.Path & vbCRLF 
+objWord.Selection.TypeText "Path Separator: " & objWord.PathSeparator & vbCRLF objWord.Selection.TypeText "Print Preview: " & objWord.PrintPreview & vbCRLF 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "Recent Files (" & objWord.RecentFiles.Count & "):" & vbCRLF ctr = 0 
+For Each objFile in objWord.RecentFiles 
+ ctr = ctr + 1 
+ objWord.Selection.TypeText "- " & ctr & ": " & objFile & vbCRLF 
+Next  
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "Screen Updating: " & objWord.ScreenUpdating & vbCRLF objWord.Selection.TypeText "Show Visual Basic Editor: " & objWord.ShowVisualBasicEditor & vbCRLF objWord.Selection.TypeText "Special Mode: " & objWord.SpecialMode & vbCRLF 
+svFontName = objword.selection.font.name 
+svFontSize = objword.selection.font.size 
+objWord.Selection.TypeText "Startup Path: "  
+objword.selection.font.name = "Courier New" 
+objword.selection.font.size = 8 
+objWord.Selection.TypeText objWord.StartupPath & vbCRLF 
+objword.selection.font.name = svFontName 
+objword.selection.font.size = svFontSize 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "Tasks (" & objWord.Tasks.Count & "):" & vbCRLF ctr = 0 
+For Each objTask in objWord.Tasks 
+ ctr = ctr + 1 
+ objWord.Selection.TypeText "- " & ctr & ": " & objTask & vbCRLF 
+Next 
+objWord.Selection.TypeText vbcrlf  
+For Each objTemplate in objWord.Templates 
+ objWord.Selection.TypeText "Template: " & objTemplate & vbCRLF 
+Next 
+objWord.Selection.TypeText vbcrlf  
+objWord.Selection.TypeText "Top: " & objWord.Top & vbCRLF 
+objWord.Selection.TypeText "Usable Height: " & objWord.UsableHeight & vbCRLF objWord.Selection.TypeText "Usable Width: " & objWord.UsableWidth & vbCRLF objWord.Selection.TypeText "User Address: " & objWord.UserAddress & vbCRLF
+objWord.Selection.TypeText "User Control: " & objWord.UserControl & vbCRLF objWord.Selection.TypeText "User Initials: " & objWord.UserInitials & vbCRLF 
+objWord.Selection.TypeText "User Name: "  
+svFontName = objword.selection.font.name 
+svFontSize = objword.selection.font.size 
+objword.selection.font.name = "Times New Roman" 
+objword.selection.font.size = 18 
+objWord.Selection.TypeText objWord.UserName & vbCRLF 
+objword.selection.font.name = svFontname 
+objword.selection.font.size = svFontSize 
+objWord.Selection.TypeText "Version: " & objWord.Version & vbCRLF objWord.Selection.TypeText "Visible: " & objWord.Visible & vbCRLF objWord.Selection.TypeText "Width: " & objWord.Width & vbCRLF 
+For Each objWindow in objWord.Windows 
+ objWord.Selection.TypeText "Window: " & objWindow & vbCRLF Next 
+objWord.Selection.TypeText "Window State: " & objWord.WindowState & vbCRLF 'objWord.Quit 
+objWord.Selection.TypeText "*--- END OF LIST ---*" & vbCRLF WScript.quit 
+Sub CheckError(ErrSrc) 
+If Err.Number <> 0 then  
+ Msg = "Exception:" & vbCrLf &_ 
+ " Error number: " & Err.Number & vbCrLf &_ 
+ " Error description: '" & Err.Description & vbCrLf & _  " Source" & ErrSrc 
+ MsgBox Msg,,"Error?" 
+end if  
+End Sub
