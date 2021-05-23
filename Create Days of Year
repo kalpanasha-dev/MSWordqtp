@@ -1,0 +1,16 @@
+Option Explicit 
+Dim objWord, objDoc 
+Dim Msg, i, dtdate 
+Set objWord = CreateObject("Word.Application") ' Launch Microsoft Word Set objDoc = objWord.Documents.Add ' Create a new document objWord.Visible = True 
+dtDate = #01/01/2011# 
+objWord.selection.font.size = 12 
+objWord.selection.font.name = "Times New Roman" 
+For i = 1 to 16 
+ objWord.selection.font.bold = true 
+ objWord.Selection.TypeText FormatDateTime(dtDate,vbLongDate) & vbcrlf  objWord.selection.font.bold = false 
+ objWord.Selection.TypeText vbcrlf 
+ dtDate = dtDate + 1 
+Next 
+Msg = "Done"  
+MsgBox Msg,,Wscript.Scriptname 
+wscript.quit
