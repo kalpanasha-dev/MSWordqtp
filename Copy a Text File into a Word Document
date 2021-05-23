@@ -1,0 +1,73 @@
+Option Explicit 
+Dim objFSO, objIPFile, FN, ipPath 
+Dim CtrIP, ctrOP, ipLine, OPLine, objWord, objDoc 
+Dim Msg, i 
+Const OpLimit = 1000 ' <-------------------- 
+Const wdSeekPrimaryFooter = 4 
+Const wdSeekPrimaryHeader = 1 
+Const wdSeekMainDocument = 0 
+Const wdAlignParagraphCenter = 1 
+Const wdFieldPage = 33 
+Const wdFieldNumPages = 26 
+Const wdFieldEmpty = -1 
+Const wdFieldFileName = 29 
+If Wscript.Arguments.Count = 0 then  
+ wscript.echo "Please drag a file on top of the icon!" 
+ wscript.quit 
+end if 
+ipPath = wscript.arguments(0) ' Complete input file name 
+Set objFSO = CreateObject("Scripting.FileSystemObject") 
+Set objIpFile = objFSO.OpenTextFile(IPPath) 
+Set objWord = CreateObject("Word.Application") ' Launch Microsoft Word Set objDoc = objWord.Documents.Add ' Create a new document objWord.Visible = True 
+objword.ActiveDocument.pagesetup.leftmargin = 50 ' Pixels??? 
+objword.ActiveDocument.pagesetup.rightmargin = 50 ' Pixels??? 
+ProcHeader 
+ProcFooter 
+CtrIP = 0 : CtrOP = 0 
+Do Until objIPFile.AtEndOfStream 
+ ipLine = RTrim(objIPFile.ReadLine) : CtrIP = CtrIP + 1 
+ If (left(IpLine,1) = "<") or _ 
+ (instr(1,IpLine,"<html>",vbTextCompare) > 0) or _ 
+ (instr(1,IpLine,"<tt>",vbTextCompare) > 0) or _ 
+ (instr(1,IpLine,"<td w",vbTextCompare) > 0) then 
+ ctrSkipped = ctrSkipped + 1 
+ else 
+ opLine = ipLine 
+ objword.selection.font.size = 12 
+ objWord.selection.TypeText opLine & vbcrlf
+CtrOP = CtrOP + 1 
+ if ctrOP > opLimit then  
+ wscript.quit 
+end if  
+ end if 
+loop 
+objIPfile.Close() 
+Msg = ""  
+Msg = Msg & "IpFile: " & IPPath & vbCRLF 
+Msg = Msg & CtrIP & " records read. " & vbCRLF 
+MsgBox Msg,,Wscript.Scriptname 
+Set objFSO = nothing 
+Set objIPFile = nothing 
+Set objOPFile = nothing 
+wscript.quit 
+'*------------* 
+'* Process the Header 
+'*------------* 
+Sub ProcHeader 
+With objWord 
+ .ActiveWindow.ActivePane.View.SeekView = wdSeekPrimaryHeader  .selection.font.name = "Times New Roman" 
+ .selection.Paragraphs.Alignment = wdAlignParagraphCenter  .selection.font.size = 14 
+ .Selection.TypeText "Module Linkage Report" & vbcrlf  .selection.font.size = 12 
+ .Selection.TypeText "Input: " & IPPath 
+end with 
+End sub 
+'*------------* 
+'* Process the Footer 
+'*------------* 
+Sub ProcFooter 
+With objWord 
+ .ActiveWindow.ActivePane.View.SeekView = wdSeekPrimaryFooter  .selection.font.size = 08 
+ .selection.Paragraphs.Alignment = wdAlignParagraphCenter  .Selection.Fields.Add .Selection.Range,wdFieldFileName,"\p",false  .Selection.TypeText " - " & Now() & " - Page " 
+ .Selection.Fields.Add .Selection.Range,wdFieldPage  .Selection.TypeText " of " 
+ .Selection.Fields.Add .Selection.Range,wdFieldNumPages end with 
+objWord.ActiveWindow.ActivePane.View.Seekview = wdSeekMainDocument End Sub
