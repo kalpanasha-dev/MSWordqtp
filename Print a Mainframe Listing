@@ -1,0 +1,90 @@
+Option Explicit 
+Const wdSeekPrimaryFooter = 4 
+Const wdSeekPrimaryHeader = 1 
+Const wdSeekMainDocument = 0 
+Const wdAlignParagraphCenter = 1 
+Const wdFieldPage = 33 
+Const wdFieldNumPages = 26 
+Const wdFieldEmpty = -1 
+Const wdFieldFileName = 29 
+Const wdPageBreak = 7 
+Const wdOrientPortrait = 0 
+Const wdOrientLandscape = 1 
+Const wdPrintView = 3 
+Dim objFSO, objIPFile, FN, ipPath, initFSO 
+Dim CtrIP, ipLine, OPLine, objWord, objDoc, ctrOP 
+Dim Msg, i, ctlchar 
+' Allow the user to choose an input file 
+Set ObjFSO = CreateObject("UserAccounts.CommonDialog") 
+ObjFSO.Filter = "An Assembler listing text file|*.txt"  
+objFSO.InitialDir = "C:\My Documents\source listings\" 
+InitFSO = ObjFSO.ShowOpen 
+If InitFSO = True Then 
+ IpPath = ObjFSO.Filename 
+else 
+ MsgBox "You did not select a file!",,wscript.Scriptname 
+ Wscript.Quit 
+End If 
+' Establish access to the input file 
+Set objFSO = CreateObject("Scripting.FileSystemObject") 
+Set objIpFile = objFSO.OpenTextFile(IPPath) 
+' Establish access to the output file (Word document) 
+Set objWord = CreateObject("Word.Application") ' Launch Microsoft Word Set objDoc = objWord.Documents.Add ' Create a new document objWord.Visible = True 
+' Change to Print Layout View 
+objWord.ActiveWindow.Activepane.View.Type = wdPrintView 
+With objword.ActiveDocument.pagesetup 
+ .Orientation = wdOrientLandscape 
+ .LeftMargin = objword.InchesToPoints(0.17) 
+ .RightMargin = objword.InchesToPoints(0.17) 
+ .TopMargin = objword.InchesToPoints(0.25) 
+end with 
+  
+CtrIP = 0 : ctrOP = 0 
+ProcHeader 
+ProcFooter 
+Do Until objIPFile.AtEndOfStream 
+ Objword.selection.font.name = "Courier New"
+ objword.selection.font.size = 9 
+ ipLine = RTrim(objIPFile.ReadLine) : CtrIP = CtrIP + 1  ctlchar = left(IpLine,1) 
+ if ctlchar = "1" then 
+ if ctrIP > 1 then objword.Selection.InsertBreak(wdPageBreak)  end if 
+ If ctlchar = "0" then  
+ objWord.selection.TypeText " " & vbcrlf ' Blank line  CtrOP = CtrOP + 1 
+ end if 
+ If len(IpLine) > 0 then 
+ opLine = right(ipLine,len(IpLine)-1) 
+ else  
+ opLine = "" 
+ end if 
+ objWord.selection.TypeText opLine & vbcrlf 
+ CtrOP = CtrOP + 1 
+loop 
+objIPfile.Close() 
+Msg = ""  
+Msg = Msg & "IpFile: " & IPPath & vbCRLF 
+Msg = Msg & "- " & CtrIP & " records read. " & vbCRLF MsgBox Msg,,Wscript.Scriptname 
+Set objFSO = nothing 
+Set objIPFile = nothing 
+wscript.quit 
+'*------------* 
+'* Process the Header 
+'*------------* 
+Sub ProcHeader 
+exit sub ' If you want a heading later, comment this statement With objWord 
+ .ActiveWindow.ActivePane.View.SeekView = wdSeekPrimaryHeader  .selection.font.name = "Times New Roman" 
+ .selection.Paragraphs.Alignment = wdAlignParagraphCenter  .selection.font.size = 14 
+ .Selection.TypeText ipPath 
+ .selection.font.size = 12 
+end with 
+End sub 
+'*------------* 
+'* Process the Footer 
+'*------------* 
+Sub ProcFooter 
+With objWord 
+ .ActiveWindow.ActivePane.View.SeekView = wdSeekPrimaryFooter  .selection.font.size = 08 
+ .selection.Paragraphs.Alignment = wdAlignParagraphCenter  .Selection.Fields.Add .Selection.Range,wdFieldFileName,"\p",false  .Selection.TypeText " - " & Now() & " - Page " 
+.Selection.Fields.Add .Selection.Range,wdFieldPage 
+ .Selection.TypeText " of " 
+ .Selection.Fields.Add .Selection.Range,wdFieldNumPages end with 
+objWord.ActiveWindow.ActivePane.View.Seekview = wdSeekMainDocument End Sub
