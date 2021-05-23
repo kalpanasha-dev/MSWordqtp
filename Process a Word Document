@@ -1,0 +1,39 @@
+Option Explicit 
+Dim objFSO, objOPFile, objWord, objDoc, objSelection, objRange 
+Dim strDocument, strContents, strContents2 
+Dim FN, opPath, ThisChar 
+Dim Msg, i 
+Const wdDoNotSaveChanges = 0  
+If Wscript.Arguments.Count = 0 then  
+ wscript.echo "Please drag a file on top of the icon!" 
+ wscript.quit 
+end if 
+strDocument = wscript.arguments(0) ' Complete input file name Set objWord = CreateObject("Word.Application") 
+objWord.Visible = False 
+objWord.DisplayAlerts = False ' Do not display file type warnings for older  versions 
+objWord.Documents.Open strDocument,,True ' Open document in Read-only mode Set objDoc = objWord.ActiveDocument ' Create a reference to the current document 
+'Remove any Word-specific formatting 
+Set objSelection = objWord.Selection  
+objSelection.ClearFormatting  
+  
+Set objRange = objDoc.Content ' Create a Range object of the file's contents  strContents = objRange.Text ' Grab the text within that range  strContents = objWord.CleanString(strContents) ' Remove any non-printing characters such as  bullets 
+objWord.Quit wdDoNotSaveChanges 'Close Word without saving changes to the document 
+' Word has created strContents, and separated each text line by ONLY a carriage return.  ' We need to add line feeds. 
+strContents2 = "" 
+For i = 1 to len(strContents) 
+ ThisChar = mid(strContents,i,1)  
+ If ThisChar = vbCR then 
+ strContents2 = strContents2 & vbcrlf 
+ else 
+ strContents2 = strContents2 & ThisChar 
+ end if 
+Next  
+OpPath = "\\Dmvfsp08\mwdxg12$\Assignments\Misc\document.txt" 
+Set objFSO = CreateObject("Scripting.FileSystemObject") 
+Set objOPFile = objFSO.CreateTextFile(OPPath) 
+objOPFile.write(strContents2)  
+objOPfile.Close()
+Msg = "Command complete!" MsgBox Msg,,Wscript.Scriptname 
+Set objOPFile = nothing Set objFSO = nothing Set objOPFile = nothing Set objSelection = nothing 
+Set objDoc = nothing 
+Set objWord = nothing
