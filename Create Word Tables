@@ -1,0 +1,14 @@
+' Create Word Tables.vbs - Create a table programmatically in a NEW Word document Dim objWord, objDoc, objRange, objTable, i, j 
+Const NUMBER_OF_ROWS = 7 
+Const NUMBER_OF_COLUMNS = 3 
+Set objWord = CreateObject("Word.Application")  
+objWord.Visible = True 
+Set objDoc = objWord.Documents.Add() ' Create a NEW document 
+Set objRange = objDoc.Range() 
+objDoc.Tables.Add objRange, NUMBER_OF_ROWS, NUMBER_OF_COLUMNS Set objTable = objDoc.Tables(1) ' Work with the first (and only) table 
+For i = 1 to NUMBER_OF_ROWS 
+ For j = 1 to NUMBER_OF_COLUMNS 
+ objTable.Cell(i, j).Range.Text = "Row " & i & ", Column " & j  objTable.Cell(i, j).Range.Text = "Row " & i & ", Column " & j  objTable.Cell(i, j).Range.Text = "Row " & i & ", Column " & j  next 
+next 
+'ObjTable.Rows.add() ' Add a blank row 
+objTable.AutoFormat(16) 
