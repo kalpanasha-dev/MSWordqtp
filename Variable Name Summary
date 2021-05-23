@@ -1,0 +1,173 @@
+Option Explicit 
+Dim ipPath, objFSO, Msg, arStmts(20000), ipLine, objWord, ctrStmts 
+Dim objDoc 
+Const OPLIMIT = 999 '<------------------------------------- 
+Const wdSeekPrimaryFooter = 4 
+Const wdSeekPrimaryHeader = 1 
+Const wdSeekMainDocument = 0 
+Const wdAlignParagraphCenter = 1 
+Const wdFieldPage = 33 
+Const wdFieldNumPages = 26 
+ProcInit ' Initialization 
+Proc01 ' Add all of the Assembler statements to an array 
+Proc02 ' Process the variables (via the cross-reference) 
+MsgBox Msg,,Wscript.Scriptname & " completed." 
+Set objFSO = nothing 
+WScript.quit 
+'*------------* 
+'* Initialization 
+'*------------* 
+Sub ProcInit 
+If Wscript.Arguments.Count = 0 then  
+ wscript.echo "Please drag a file to the icon!" 
+ wscript.quit 
+end if 
+IpPath = wscript.arguments(0) ' Complete input file name Msg = "IpFile: " & IPPath & vbCRLF 
+Set objFSO = CreateObject("Scripting.FileSystemObject") 
+Set objWord = CreateObject("Word.Application") ' Launch Microsoft Word Set objDoc = objWord.Documents.Add ' Create a new document objWord.Visible = True 
+objword.ActiveDocument.pagesetup.leftmargin = 50 ' Pixels??? 
+objword.ActiveDocument.pagesetup.rightmargin = 50 ' Pixels??? 
+' Header 
+objWord.ActiveWindow.ActivePane.View.SeekView = wdSeekPrimaryHeader 
+objword.selection.font.name = "Times New Roman" 
+objword.selection.font.size = 14 
+objWord.selection.Paragraphs.Alignment = wdAlignParagraphCenter 
+objWord.Selection.TypeText IPPath
+ProcFooter 
+End Sub 
+'*------------* 
+'* Add all of the Assembler statements to an array 
+'*------------* 
+Sub Proc01 
+Dim objIpFile, ipLine, swInStmts, ctrIP, stmtno 
+Set objIpFile = objFSO.OpenTextFile(IPPath) 
+ctrIp = 0 : ctrStmts = 0 
+swInStmts = "N" 
+Do Until objIPFile.AtEndOfStream 
+ ipLine = RTrim(objIPFile.ReadLine) : CtrIP = CtrIP + 1 
+  
+ if swInStmts = "N" then 
+ If mid(IpLine,37,4) = "STMT" then  
+ swInStmts = "Y" 
+ end if 
+ end if 
+ if swInStmts = "Y" then  
+ If mid(IpLine,51,21) = "RELOCATION DICTIONARY" then  
+ swInStmts = "X" ' We are done 
+ end if 
+ end if 
+ if swInStmts = "Y" then 
+ ' Lines to skip 
+ if (mid(IpLine,42,1) = "*") or _ 
+ (left(IpLine,1) = "1") or _ 
+ (mid(ipLine,4,14) = "ACTIVE USINGS:") then  
+ else 
+ stmtno = mid(IpLine,36,5) 
+ If IsNumeric(stmtno) then  
+ ctrStmts = ctrStmts + 1 
+ arStmts(stmtno) = mid(IpLine,36,78) ' Add it to the nth entry  end if  
+end if  
+ end if 
+loop 
+objIPfile.Close() 
+Set objIPFile = nothing 
+Msg = "Records read: " & ctrIP & vbcrlf 
+Msg = Msg & "arStmts added: " & ctrStmts & vbcrlf 
+End Sub 
+'*------------* 
+'* Process the variables (via the Cross-Reference) 
+'*------------* 
+Sub Proc02 
+Dim objIpFile, swInXref, ctrIP, ctrXRef 
+Set objIpFile = objFSO.OpenTextFile(IPPath) 
+ctrIp = 0  
+swInXRef = "N" 
+ctrXref = 0 
+Do Until objIPFile.AtEndOfStream 
+ ipLine = RTrim(objIPFile.ReadLine) : CtrIP = CtrIP + 1 
+ if swInXref = "N" then  
+ If mid(IpLine,33,43) = "ORDINARY SYMBOL AND LITERAL CROSS REFERENCE" then   swInXref = "Y" 
+ end if 
+ end if 
+ if swInXref = "Y" then 
+ If mid(IpLine,2,1) = "=" then ' First literal. We are done.  'wscript.echo "I found the END of the cross-ref section (the first literal)"  swInXref = "X" 
+end if 
+ end if 
+ if swInXref = "Y" then  
+ ctrXRef = ctrXRef + 1 
+ ' Lines to skip 
+if (left(IpLine,8) = "1 ") or _  
+ (left(IpLine,7) = "-SYMBOL") then 
+else 
+ Proc021 ' Process this variable 
+ end if  
+ end if 
+ if ctrXref > OPLIMIT then  
+ exit do 
+ end if 
+loop 
+objIPfile.Close() 
+Set objIPFile = nothing 
+Msg = "XRef recs read: " & ctrXRef & vbcrlf 
+End Sub 
+'*------------* 
+'* Process one variable 
+'*------------* 
+Sub Proc021 
+Dim ipLabel, ipLength, ipAddress, ipType, ipDefn, ipRefs, Msg2, i, strWk Dim stmtno, stmtbody, arWord, refNo 
+if mid(IpLine,2,8) <> space(8) then  
+ ipLabel = mid(IpLine,2,8) ' Assembler label 
+end if 
+ipLength = mid(IpLine,12,5) ' Length 
+ipAddress = mid(IpLine,18,8) ' Address 
+ipType = mid(IpLine,40,1) ' Type 
+ipDefn = mid(IpLine,56,6) ' Defined at statement no. 
+if mid(IpLine,2,8) = space(8) then  
+ ipRefs = ipRefs & mid(IpLine,63,55) ' References 
+else  
+ ipRefs = mid(IpLine,63,55) ' References 
+end if  
+' Process the definition statement 
+If trim(ipDefn) <> "" then  
+ objword.selection.font.name = "Courier New" 
+ objword.selection.font.size = 10 
+ Msg2 = "Variable=" & trim(ipLabel) & "; " 
+ Msg2 = Msg2 & "length=" & ipLength & "; " 
+ Msg2 = Msg2 & "Address=" & ipAddress & "; " 
+ Msg2 = Msg2 & "type=" & ipType 
+ objWord.Selection.TypeText Msg2 & vbcrlf 
+ objword.selection.font.size = 9 
+ Msg2 = " DEFN (" & trim(ipdefn) & "):" & vbTab 
+ strWk = arStmts(ipdefn) & space(7) 
+ stmtbody = Right(strWk,len(strWk)-6) 
+ Msg2 = Msg2 & stmtbody 
+ objWord.Selection.TypeText Msg2 & vbcrlf  
+end if  
+' Process the references now. 
+IpRefs = trim(IpRefs)
+arWord = Split(IpRefs) 
+for each RefNo in arWord 
+ Refno = trim(Refno) 
+ If Refno <> "" then  
+ If right(RefNo,1) = "B" then Refno = left(RefNo,len(RefNo) - 1)  If right(RefNo,1) = "D" then Refno = left(RefNo,len(RefNo) - 1)  If right(RefNo,1) = "M" then Refno = left(RefNo,len(RefNo) - 1)  If right(RefNo,1) = "U" then Refno = left(RefNo,len(RefNo) - 1)  objword.selection.font.size = 9 
+ Msg2 = " REF (" & RefNo & "):" & vbTab 
+ strWk = arStmts(RefNo) & space(7) 
+ stmtbody = Right(strWk,len(strWk)-6) 
+ Msg2 = Msg2 & stmtbody 
+ objWord.Selection.TypeText Msg2 & vbcrlf  
+ end if 
+next 
+objWord.Selection.TypeText vbcrlf 
+End Sub 
+'*------------* 
+'* Process the Footer 
+'*------------* 
+Sub ProcFooter 
+Dim strWk 
+With objWord 
+ .ActiveWindow.ActivePane.View.SeekView = wdSeekPrimaryFooter  .selection.font.size = 08 
+ .selection.Paragraphs.Alignment = wdAlignParagraphCenter  .Selection.TypeText Now() & " - Page " 
+ .Selection.Fields.Add .Selection.Range,wdFieldPage  .Selection.TypeText " of " 
+ .Selection.Fields.Add .Selection.Range,wdFieldNumPages end with 
+'objWord.Selection.TypeText strwk 
+objWord.ActiveWindow.ActivePane.View.Seekview = wdSeekMainDocument End Sub
